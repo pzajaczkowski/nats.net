@@ -84,6 +84,8 @@ await client.PublishAsync("x.json", new MyData(30, "bar"));
     Console.WriteLine($"Response: {response.Data}");
 }
 
+await client.ReconnectAsync();
+
 // Request/Reply without request data
 for (var i = 0; i < 3; i++)
 {

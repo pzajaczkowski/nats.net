@@ -61,10 +61,7 @@ public class NatsClient : INatsClient
     {
         if (ReferenceEquals(opts.SerializerRegistry, NatsOpts.Default.SerializerRegistry))
         {
-            opts = opts with
-            {
-                SerializerRegistry = NatsClientDefaultSerializerRegistry.Default,
-            };
+            opts = opts with { SerializerRegistry = NatsClientDefaultSerializerRegistry.Default, };
         }
 
         opts = opts with { SubPendingChannelFullMode = pending };
@@ -94,12 +91,16 @@ public class NatsClient : INatsClient
         => Connection.SubscribeAsync(subject, queueGroup, serializer, opts, cancellationToken);
 
     /// <inheritdoc />
-    public ValueTask<NatsMsg<TReply>> RequestAsync<TRequest, TReply>(string subject, TRequest? data, NatsHeaders? headers = default, INatsSerialize<TRequest>? requestSerializer = default, INatsDeserialize<TReply>? replySerializer = default, NatsPubOpts? requestOpts = default, NatsSubOpts? replyOpts = default, CancellationToken cancellationToken = default)
+    public ValueTask<NatsMsg<TReply>> RequestAsync<TRequest, TReply>(string subject, TRequest? data, NatsHeaders? headers = default, INatsSerialize<TRequest>? requestSerializer = default, INatsDeserialize<TReply>? replySerializer = default, NatsPubOpts? requestOpts = default,
+        NatsSubOpts? replyOpts = default, CancellationToken cancellationToken = default)
         => Connection.RequestAsync(subject, data, headers, requestSerializer, replySerializer, requestOpts, replyOpts, cancellationToken);
 
     /// <inheritdoc />
     public ValueTask<NatsMsg<TReply>> RequestAsync<TReply>(string subject, INatsDeserialize<TReply>? replySerializer = default, NatsSubOpts? replyOpts = default, CancellationToken cancellationToken = default)
         => Connection.RequestAsync(subject, replySerializer, replyOpts, cancellationToken);
+
+    /// <inheritdoc />
+    public ValueTask ReconnectAsync() => Connection.ReconnectAsync();
 
     /// <inheritdoc />
     public ValueTask DisposeAsync() => Connection.DisposeAsync();

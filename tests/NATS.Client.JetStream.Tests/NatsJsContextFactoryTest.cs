@@ -137,6 +137,8 @@ public class NatsJSContextFactoryTest
 
         public ValueTask<NatsMsg<TReply>> RequestAsync<TReply>(string subject, INatsDeserialize<TReply>? replySerializer = default, NatsSubOpts? replyOpts = default, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 
+        public ValueTask ReconnectAsync() => throw new NotImplementedException();
+
         public IAsyncEnumerable<NatsMsg<TReply>> RequestManyAsync<TRequest, TReply>(
             string subject,
             TRequest? data,
@@ -154,7 +156,8 @@ public class NatsJSContextFactoryTest
 
         public BoundedChannelOptions GetBoundedChannelOpts(NatsSubChannelOpts? subChannelOpts) => throw new NotImplementedException();
 
-        public ValueTask<NatsSub<TReply>> CreateRequestSubAsync<TRequest, TReply>(string subject, TRequest? data, NatsHeaders? headers = default, INatsSerialize<TRequest>? requestSerializer = default, INatsDeserialize<TReply>? replySerializer = default, NatsPubOpts? requestOpts = default, NatsSubOpts? replyOpts = default, CancellationToken cancellationToken = default) =>
+        public ValueTask<NatsSub<TReply>> CreateRequestSubAsync<TRequest, TReply>(string subject, TRequest? data, NatsHeaders? headers = default, INatsSerialize<TRequest>? requestSerializer = default, INatsDeserialize<TReply>? replySerializer = default, NatsPubOpts? requestOpts = default,
+            NatsSubOpts? replyOpts = default, CancellationToken cancellationToken = default) =>
             throw new NotImplementedException();
 
         public ValueTask ConnectAsync() => throw new NotImplementedException();
