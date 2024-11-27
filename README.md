@@ -6,7 +6,7 @@
 - fdrazba
 - bciereszynski
 
-[!NOTE]
+>[!NOTE]
 >[NATS](https://nats.io) is a lightweight and high-performance messaging system designed for asynchronous communication among
 >different software components, with modern clustering, security and persistence streaming support
 >out of the box, in a [single compact binary with no dependencies](https://nats.io/download/), available for any modern
@@ -24,4 +24,4 @@
 
 GitHub Pages site for the **NATS.NET** contribution documentation.
 
-🔗 **[Visit the Site](https://github.com/pzajaczkowski/nats.net/)**
+🔗 **[Visit the Fork Site](https://github.com/pzajaczkowski/nats.net/)**
