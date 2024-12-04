@@ -22,6 +22,12 @@
   - Asking for details of some expected behaviour of the method to implement
   - Created [pull request](https://github.com/nats-io/nats.net/pull/684) with solution
   - ![image](https://github.com/user-attachments/assets/6f4efbeb-63cc-4c00-9c04-29fae37f39da)
+  - Pull request accepted and changes merged to main 🎉
+  - ![obraz](https://github.com/user-attachments/assets/82b483be-b4b5-4463-9f0b-00dc75d2db8b)
+- ### **[Issue - Implement Lame Duck Mode Event Handler](https://github.com/nats-io/nats.net/issues/23)**
+  - Research about Lame Duck Mode topic
+  - Looking how does LDM looks in code
+  - Brainstorm about best solution and its architecture
 
 GitHub Pages site for the **NATS.NET** contribution documentation.
 
