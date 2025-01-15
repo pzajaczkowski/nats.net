@@ -28,6 +28,13 @@
   - Research about Lame Duck Mode topic
   - Looking how does LDM looks in code
   - Brainstorm about best solution and its architecture
+  - Session of pair programming with Filip and Bartosz
+  - First solution with trigger method
+  - Second solution with setter
+  - Decision to go with second solution
+  - Created [pull request](https://github.com/nats-io/nats.net/pull/716)
+  - ![image](https://github.com/user-attachments/assets/45c41ded-e98d-4a3b-9905-4ccac8327df6)
+
 
 GitHub Pages site for the **NATS.NET** contribution documentation.
 
