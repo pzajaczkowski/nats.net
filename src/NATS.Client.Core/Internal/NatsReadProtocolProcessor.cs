@@ -415,29 +415,27 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
 
             // try to get \n.
             var position = buffer.PositionOf((byte)'\n');
+            var usedBuffer = buffer;
 
             if (position == null)
             {
-                _socketReader.AdvanceTo(buffer.Start);
-                var newBuffer = await _socketReader.ReadUntilReceiveNewLineAsync().ConfigureAwait(false);
-                var newPosition = newBuffer.PositionOf((byte)'\n');
+                usedBuffer = await _socketReader.ReadUntilReceiveNewLineAsync().ConfigureAwait(false);
+                position = usedBuffer.PositionOf((byte)'\n');
+            }
 
-                var serverInfo = ParseInfo(newBuffer);
-                _connection.WritableServerInfo = serverInfo;
-                _logger.LogInformation(NatsLogEvents.Protocol, "Received server info: {ServerInfo}", serverInfo);
-                _waitForInfoSignal.TrySetResult();
-                await _infoParsed.ConfigureAwait(false);
-                return newBuffer.Slice(newBuffer.GetPosition(1, newPosition!.Value));
-            }
-            else
+            var serverInfo = ParseInfo(usedBuffer);
+            var previousLazyDuckMode = _connection.WritableServerInfo?.LameDuckMode ?? false;
+
+            if (previousLazyDuckMode != serverInfo.LameDuckMode && serverInfo.LameDuckMode)
             {
-                var serverInfo = ParseInfo(buffer);
-                _connection.WritableServerInfo = serverInfo;
-                _logger.LogInformation(NatsLogEvents.Protocol, "Received server info: {ServerInfo}", serverInfo);
-                _waitForInfoSignal.TrySetResult();
-                await _infoParsed.ConfigureAwait(false);
-                return buffer.Slice(buffer.GetPosition(1, position.Value));
+                _connection.TriggerLameDuckMode();
             }
+
+            _connection.WritableServerInfo = serverInfo;
+            _logger.LogInformation(NatsLogEvents.Protocol, "Received server info: {ServerInfo}", serverInfo);
+            _waitForInfoSignal.TrySetResult();
+            await _infoParsed.ConfigureAwait(false);
+            return usedBuffer.Slice(usedBuffer.GetPosition(1, position!.Value));
         }
         else
         {
@@ -576,12 +574,12 @@ internal sealed class NatsReadProtocolProcessor : IAsyncDisposable
     internal static class ServerOpCodes
     {
         // All sent by server commands as int(first 4 characters(includes space, newline)).
-        public const int Info = 1330007625;  // Encoding.ASCII.GetBytes("INFO") |> MemoryMarshal.Read<int>
-        public const int Msg = 541545293;    // Encoding.ASCII.GetBytes("MSG ") |> MemoryMarshal.Read<int>
-        public const int HMsg = 1196641608;  // Encoding.ASCII.GetBytes("HMSG") |> MemoryMarshal.Read<int>
-        public const int Ping = 1196312912;  // Encoding.ASCII.GetBytes("PING") |> MemoryMarshal.Read<int>
-        public const int Pong = 1196314448;  // Encoding.ASCII.GetBytes("PONG") |> MemoryMarshal.Read<int>
-        public const int Ok = 223039275;     // Encoding.ASCII.GetBytes("+OK\r") |> MemoryMarshal.Read<int>
+        public const int Info = 1330007625; // Encoding.ASCII.GetBytes("INFO") |> MemoryMarshal.Read<int>
+        public const int Msg = 541545293; // Encoding.ASCII.GetBytes("MSG ") |> MemoryMarshal.Read<int>
+        public const int HMsg = 1196641608; // Encoding.ASCII.GetBytes("HMSG") |> MemoryMarshal.Read<int>
+        public const int Ping = 1196312912; // Encoding.ASCII.GetBytes("PING") |> MemoryMarshal.Read<int>
+        public const int Pong = 1196314448; // Encoding.ASCII.GetBytes("PONG") |> MemoryMarshal.Read<int>
+        public const int Ok = 223039275; // Encoding.ASCII.GetBytes("+OK\r") |> MemoryMarshal.Read<int>
         public const int Error = 1381123373; // Encoding.ASCII.GetBytes("-ERR") |> MemoryMarshal.Read<int>
     }
 }

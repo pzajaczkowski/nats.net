@@ -24,6 +24,7 @@ internal enum NatsEvent
     ConnectionDisconnected,
     ReconnectFailed,
     MessageDropped,
+    LameDuckModeActivated,
 }
 
 public partial class NatsConnection : INatsConnection
@@ -84,19 +85,11 @@ public partial class NatsConnection : INatsConnection
         HeaderParser = new NatsHeaderParser(opts.HeaderEncoding);
         _defaultSubscriptionChannelOpts = new BoundedChannelOptions(opts.SubPendingChannelCapacity)
         {
-            FullMode = opts.SubPendingChannelFullMode,
-            SingleWriter = true,
-            SingleReader = false,
-            AllowSynchronousContinuations = false,
+            FullMode = opts.SubPendingChannelFullMode, SingleWriter = true, SingleReader = false, AllowSynchronousContinuations = false,
         };
 
         // push consumer events to a channel so handlers can be awaited (also prevents user code from blocking us)
-        _eventChannel = Channel.CreateUnbounded<(NatsEvent, NatsEventArgs)>(new UnboundedChannelOptions
-        {
-            AllowSynchronousContinuations = false,
-            SingleWriter = false,
-            SingleReader = true,
-        });
+        _eventChannel = Channel.CreateUnbounded<(NatsEvent, NatsEventArgs)>(new UnboundedChannelOptions { AllowSynchronousContinuations = false, SingleWriter = false, SingleReader = true, });
         _ = Task.Run(PublishEventsAsync, _disposedCancellationTokenSource.Token);
     }
 
@@ -108,6 +101,8 @@ public partial class NatsConnection : INatsConnection
     public event AsyncEventHandler<NatsEventArgs>? ReconnectFailed;
 
     public event AsyncEventHandler<NatsMessageDroppedEventArgs>? MessageDropped;
+
+    public event AsyncEventHandler<NatsEventArgs>? LameDuckModeActivated;
 
     public INatsConnection Connection => this;
 
@@ -286,6 +281,11 @@ public partial class NatsConnection : INatsConnection
         }
 
         return default;
+    }
+
+    internal void TriggerLameDuckMode()
+    {
+        _eventChannel.Writer.TryWrite((NatsEvent.LameDuckModeActivated, new NatsEventArgs(string.Empty)));
     }
 
     private async ValueTask InitialConnectAsync()
@@ -578,7 +578,7 @@ public partial class NatsConnection : INatsConnection
             _currentConnectUri = null;
             var urlEnumerator = urls.AsEnumerable().GetEnumerator();
             NatsUri? url = null;
-        CONNECT_AGAIN:
+            CONNECT_AGAIN:
 
             _logger.LogDebug(NatsLogEvents.Connection, "Trying to reconnect [{ReconnectCount}]", reconnectCount);
 
@@ -761,6 +761,9 @@ public partial class NatsConnection : INatsConnection
                         break;
                     case NatsEvent.MessageDropped when MessageDropped != null && args is NatsMessageDroppedEventArgs error:
                         await MessageDropped.InvokeAsync(this, error).ConfigureAwait(false);
+                        break;
+                    case NatsEvent.LameDuckModeActivated when LameDuckModeActivated != null:
+                        await LameDuckModeActivated.InvokeAsync(this, args).ConfigureAwait(false);
                         break;
                     }
                 }
