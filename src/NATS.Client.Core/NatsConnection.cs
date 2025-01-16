@@ -141,10 +141,9 @@ public partial class NatsConnection : INatsConnection
         get => Interlocked.CompareExchange(ref _writableServerInfo, null, null);
         set
         {
-            var current = Interlocked.CompareExchange(ref _writableServerInfo, null, null);
-            if (current?.LameDuckMode == false && value?.LameDuckMode == true)
+            if (value?.LameDuckMode == true)
             {
-                _eventChannel.Writer.TryWrite((NatsEvent.LameDuckModeActivated, new NatsEventArgs(string.Empty)));
+                _eventChannel.Writer.TryWrite((NatsEvent.LameDuckModeActivated, new NatsLameDuckModeActivatedEventArgs(value)));
             }
 
             Interlocked.Exchange(ref _writableServerInfo, value);

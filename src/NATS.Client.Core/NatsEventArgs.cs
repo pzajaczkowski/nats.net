@@ -33,3 +33,12 @@ public class NatsMessageDroppedEventArgs : NatsEventArgs
 
     public object? Data { get; }
 }
+
+public class NatsLameDuckModeActivatedEventArgs : NatsEventArgs
+{
+    public NatsLameDuckModeActivatedEventArgs(INatsServerInfo serverInfo)
+        : base("Lame duck mode activated") =>
+        ServerInfo = serverInfo;
+
+    public INatsServerInfo ServerInfo { get; }
+}
